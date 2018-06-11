@@ -1,0 +1,81 @@
+policy_module(coinium, 1.100.1)
+
+########################################
+#
+# Declarations
+#
+
+type coinium_t;
+type coinium_exec_t;
+init_daemon_domain(coinium_t, coinium_exec_t)
+
+permissive coinium_t;
+
+type coinium_initrc_exec_t;
+init_script_file(coinium_initrc_exec_t)
+
+type coinium_conf_t;
+files_type(coinium_conf_t)
+
+type coinium_var_lib_t;
+files_type(coinium_var_lib_t)
+
+type coinium_var_run_t;
+files_type(coinium_var_run_t)
+
+type coinium_port_t;
+corenet_port(coinium_port_t)
+
+########################################
+#
+# coinium local policy
+#
+allow coinium_t self:process { fork };
+
+allow coinium_t self:fifo_file rw_fifo_file_perms;
+allow coinium_t self:unix_stream_socket create_stream_socket_perms;
+
+manage_dirs_pattern(coinium_t, coinium_conf_t, coinium_conf_t)
+manage_files_pattern(coinium_t, coinium_conf_t, coinium_conf_t)
+
+manage_dirs_pattern(coinium_t, coinium_var_lib_t, coinium_var_lib_t)
+manage_files_pattern(coinium_t, coinium_var_lib_t, coinium_var_lib_t)
+files_var_lib_filetrans(coinium_t, coinium_var_lib_t, { dir file })
+
+manage_dirs_pattern(coinium_t, coinium_var_run_t, coinium_var_run_t)
+manage_files_pattern(coinium_t, coinium_var_run_t, coinium_var_run_t)
+
+sysnet_dns_name_resolve(coinium_t)
+corenet_all_recvfrom_unlabeled(coinium_t)
+
+allow coinium_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_sendrecv_generic_if(coinium_t)
+corenet_tcp_sendrecv_generic_node(coinium_t)
+corenet_tcp_sendrecv_all_ports(coinium_t)
+corenet_tcp_bind_generic_node(coinium_t)
+
+gen_require(`
+    type coinium_port_t;
+')
+allow coinium_t coinium_port_t:tcp_socket name_bind;
+
+gen_require(`
+    type coinium_port_t;
+')
+allow coinium_t coinium_port_t:tcp_socket name_connect;
+
+domain_use_interactive_fds(coinium_t)
+
+files_read_etc_files(coinium_t)
+
+miscfiles_read_localization(coinium_t)
+
+sysnet_dns_name_resolve(coinium_t)
+
+allow coinium_t coinium_exec_t:file execute_no_trans;
+allow coinium_t self:process setsched;
+corecmd_exec_ls(coinium_t)
+corenet_tcp_connect_http_port(coinium_t)
+dev_read_urand(coinium_t)
+fs_getattr_xattr_fs(coinium_t)
+kernel_read_system_state(coinium_t)

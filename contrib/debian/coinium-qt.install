@@ -1,0 +1,6 @@
+usr/local/bin/coinium-qt usr/bin
+share/pixmaps/coinium32.xpm usr/share/pixmaps
+share/pixmaps/coinium16.xpm usr/share/pixmaps
+share/pixmaps/coinium128.png usr/share/pixmaps
+debian/coinium-qt.desktop usr/share/applications
+debian/coinium-qt.protocol usr/share/kde4/services/

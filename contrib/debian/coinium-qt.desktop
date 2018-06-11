@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Coinium Core
+Comment=Connect to the Coinium P2P Network
+Comment[de]=Verbinde mit dem Coinium peer-to-peer Netzwerk
+Comment[fr]=Coinium, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Coinium, eşten eşe kriptografik sanal para birimi
+Exec=coinium-qt %u
+Terminal=false
+Type=Application
+Icon=coinium128
+MimeType=x-scheme-handler/coinium;
+Categories=Office;Finance;

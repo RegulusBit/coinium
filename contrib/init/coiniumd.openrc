@@ -1,0 +1,92 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/coinium/.coinium" ]; then
+	COINIUMD_DEFAULT_DATADIR="/var/lib/coinium/.coinium"
+else
+	COINIUMD_DEFAULT_DATADIR="/var/lib/coiniumd"
+fi
+
+COINIUMD_CONFIGFILE=${COINIUMD_CONFIGFILE:-/etc/coinium/coinium.conf}
+COINIUMD_PIDDIR=${COINIUMD_PIDDIR:-/var/run/coiniumd}
+COINIUMD_PIDFILE=${COINIUMD_PIDFILE:-${COINIUMD_PIDDIR}/coiniumd.pid}
+COINIUMD_DATADIR=${COINIUMD_DATADIR:-${COINIUMD_DEFAULT_DATADIR}}
+COINIUMD_USER=${COINIUMD_USER:-${COINIUM_USER:-coinium}}
+COINIUMD_GROUP=${COINIUMD_GROUP:-coinium}
+COINIUMD_BIN=${COINIUMD_BIN:-/usr/bin/coiniumd}
+COINIUMD_NICE=${COINIUMD_NICE:-${NICELEVEL:-0}}
+COINIUMD_OPTS="${COINIUMD_OPTS:-${COINIUM_OPTS}}"
+
+name="Coinium Core Daemon"
+description="Coinium cryptocurrency P2P network daemon"
+
+command="/usr/bin/coiniumd"
+command_args="-pid=\"${COINIUMD_PIDFILE}\" \
+		-conf=\"${COINIUMD_CONFIGFILE}\" \
+		-datadir=\"${COINIUMD_DATADIR}\" \
+		-daemon \
+		${COINIUMD_OPTS}"
+
+required_files="${COINIUMD_CONFIGFILE}"
+start_stop_daemon_args="-u ${COINIUMD_USER} \
+			-N ${COINIUMD_NICE} -w 2000"
+pidfile="${COINIUMD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${COINIUMD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${COINIUMD_USER}:${COINIUMD_GROUP}" \
+	"${COINIUMD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${COINIUMD_USER}:${COINIUMD_GROUP}" \
+	"${COINIUMD_PIDDIR}"
+
+	checkpath -f \
+	-o ${COINIUMD_USER}:${COINIUMD_GROUP} \
+	-m 0660 \
+	${COINIUMD_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${COINIUMD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run coiniumd."
+		eerror "The setting must appear in ${COINIUMD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following"
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is also recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Coinium Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

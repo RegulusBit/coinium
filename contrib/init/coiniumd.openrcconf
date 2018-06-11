@@ -1,0 +1,33 @@
+# /etc/conf.d/coiniumd: config file for /etc/init.d/coiniumd
+
+# Config file location
+#COINIUMD_CONFIGFILE="/etc/coinium/coinium.conf"
+
+# What directory to write pidfile to?  (created and owned by $COINIUMD_USER)
+#COINIUMD_PIDDIR="/var/run/coiniumd"
+
+# What filename to give the pidfile
+#COINIUMD_PIDFILE="${COINIUMD_PIDDIR}/coiniumd.pid"
+
+# Where to write coiniumd data (be mindful that the blockchain is large)
+#COINIUMD_DATADIR="/var/lib/coiniumd"
+
+# User and group to own coiniumd process
+#COINIUMD_USER="coinium"
+#COINIUMD_GROUP="coinium"
+
+# Path to coiniumd executable
+#COINIUMD_BIN="/usr/bin/coiniumd"
+
+# Nice value to run coiniumd under
+#COINIUMD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+COINIUMD_OPTS="-disablewallet"
+
+# The timeout in seconds OpenRC will wait for coiniumd to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+COINIUMD_SIGTERM_TIMEOUT=60

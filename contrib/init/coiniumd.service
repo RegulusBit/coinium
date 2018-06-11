@@ -1,0 +1,22 @@
+[Unit]
+Description=Coinium's distributed currency daemon
+After=network.target
+
+[Service]
+User=coinium
+Group=coinium
+
+Type=forking
+PIDFile=/var/lib/coiniumd/coiniumd.pid
+ExecStart=/usr/bin/coiniumd -daemon -pid=/var/lib/coiniumd/coiniumd.pid \
+-conf=/etc/coinium/coinium.conf -datadir=/var/lib/coiniumd -disablewallet
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=2s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target
